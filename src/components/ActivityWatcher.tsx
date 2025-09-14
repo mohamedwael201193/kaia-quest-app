@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { formatUnits, type Hex, zeroAddress } from 'viem';
 import { vault, quest, rewards } from '@/lib/contracts';
@@ -18,13 +18,13 @@ export default function ActivityWatcher() {
   const addActivity = useAppStore((s) => s.addActivity);
 
   // Helper to safely mount a watcher
-  const mount = (fn: () => (() => void) | void) => {
+  const mount = useCallback((fn: () => (() => void) | void) => {
     if (!client) return () => {};
     const unwatch = fn();
     return () => {
       try { (unwatch as unknown as (() => void))?.(); } catch {}
     };
-  };
+  }, [client]);
 
   // Vault: Deposit
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -45,7 +45,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   // Vault: Withdraw
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -66,7 +66,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   // Vault: GuildContributed
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -88,7 +88,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   // Vault: GuildFundsUnlocked
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -108,7 +108,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   // Rewards: BadgeMinted
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -127,7 +127,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   // Quest: GuildCreated
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -148,7 +148,7 @@ export default function ActivityWatcher() {
       });
     },
     onError: (err) => console.error('GuildCreated watch error:', err),
-  })), [client, addActivity, address]);
+  })), [client, addActivity, address, mount]);
 
   // Quest: QuestCompleted
   useEffect(() => mount(() => client!.watchContractEvent({
@@ -166,7 +166,7 @@ export default function ActivityWatcher() {
         });
       });
     },
-  })), [client, addActivity]);
+  })), [client, addActivity, mount]);
 
   return null;
 }
