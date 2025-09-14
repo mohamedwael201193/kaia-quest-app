@@ -39,7 +39,13 @@ export default function QuestsPage() {
       setShowCoinBurst(true)
       incrementProgress(0.01)
 
-      addActivity(`Simulated deposit of ${depositAmount} mUSDT.`)
+      addActivity({
+        id: `simulated-deposit-${Date.now()}`,
+        type: 'deposit',
+        amount: depositAmount,
+        timestamp: Date.now(),
+        user: 'Simulator',
+      })
     } else {
       // Real mode: interact with smart contracts
       deposit()
