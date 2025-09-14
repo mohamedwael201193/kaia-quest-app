@@ -47,7 +47,7 @@ export function useApprove(tokenAddress: `0x${string}`, spenderAddress: `0x${str
     })
   }
 
-  return { approve, isConfirming, isConfirmed }
+  return { approve, isConfirming }
 }
 
 export function useDeposit(amount: string) {
