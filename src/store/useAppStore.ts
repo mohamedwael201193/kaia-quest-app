@@ -1,90 +1,45 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+import type { Hex } from 'viem';
 
-interface LiffProfile {
-  displayName: string
-  pictureUrl: string
-  userId: string
-}
+export type ActivityEvent =
+  | {
+      kind:
+        | 'deposit'
+        | 'withdraw'
+        | 'guildContributed'
+        | 'guildUnlocked'
+        | 'badgeMinted'
+        | 'guildCreated'
+        | 'questCompleted'
+        | 'info';
+      message: string;
+      at: number;              // Date.now()
+      txHash?: Hex;
+      user?: `0x${string}`;
+      to?: `0x${string}`;
+      guildId?: Hex;
+      questId?: bigint;
+      value?: string;          // formatted number string
+      data?: Record<string, unknown>;
+    };
 
-interface ActivityEvent {
-  id: string
-  type: 'deposit' | 'withdraw' | 'contribute' | 'complete'
-  amount?: string
-  txHash?: string
-  timestamp: number
-  user?: string
-}
+type AppState = {
+  activity: ActivityEvent[];
+  addActivity: (input: ActivityEvent | string) => void;
+  clearActivity: () => void;
+};
 
-interface AppState {
-  // Demo mode
-  isDemoMode: boolean
-  setDemoMode: (enabled: boolean) => void
-
-  // LIFF
-  liffProfile: LiffProfile | null
-  setLiffProfile: (profile: LiffProfile | null) => void
-  isLiffReady: boolean
-  setLiffReady: (ready: boolean) => void
-
-  // Quest progress
-  questProgress: number
-  setQuestProgress: (progress: number) => void
-  incrementProgress: (amount: number) => void
-
-  // Stats
-  stats: {
-    tvl: string
-    questsCompleted: number
-    sbtsMinted: number
-  }
-  setStats: (stats: Partial<AppState['stats']>) => void
-
-  // Activity feed
-  activities: ActivityEvent[]
-  addActivity: (activity: ActivityEvent) => void
-
-  // UI state
-  isLoading: boolean
-  setLoading: (loading: boolean) => void
-}
-
-export const useAppStore = create<AppState>((set, get) => ({
-  // Demo mode
-  isDemoMode: true,
-  setDemoMode: (enabled) => set({ isDemoMode: enabled }),
-
-  // LIFF
-  liffProfile: null,
-  setLiffProfile: (profile) => set({ liffProfile: profile }),
-  isLiffReady: false,
-  setLiffReady: (ready) => set({ isLiffReady: ready }),
-
-  // Quest progress
-  questProgress: 0,
-  setQuestProgress: (progress) => set({ questProgress: Math.min(1, Math.max(0, progress)) }),
-  incrementProgress: (amount) => {
-    const current = get().questProgress
-    set({ questProgress: Math.min(1, current + amount) })
-  },
-
-  // Stats
-  stats: {
-    tvl: '$1,234,567',
-    questsCompleted: 1337,
-    sbtsMinted: 892,
-  },
-  setStats: (newStats) => set((state) => ({ 
-    stats: { ...state.stats, ...newStats } 
-  })),
-
-  // Activity feed
-  activities: [],
-  addActivity: (activity) => set((state) => ({
-    activities: [activity, ...state.activities].slice(0, 50) // Keep last 50
-  })),
-
-  // UI state
-  isLoading: false,
-  setLoading: (loading) => set({ isLoading: loading }),
-}))
+export const useAppStore = create<AppState>((set) => ({
+  activity: [],
+  addActivity: (input) =>
+    set((s) => {
+      const event: ActivityEvent =
+        typeof input === 'string'
+          ? { kind: 'info', message: input, at: Date.now() }
+          : input;
+      // keep a reasonable cap
+      return { activity: [event, ...s.activity].slice(0, 100) };
+    }),
+  clearActivity: () => set({ activity: [] }),
+}));
 

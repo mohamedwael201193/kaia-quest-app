@@ -34,7 +34,7 @@ export function useTokenAllowance(tokenAddress: `0x${string}`, spenderAddress: `
 
 export function useApprove(tokenAddress: `0x${string}`, spenderAddress: `0x${string}`, amount: bigint) {
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -47,13 +47,13 @@ export function useApprove(tokenAddress: `0x${string}`, spenderAddress: `0x${str
     })
   }
 
-  return { approve, isConfirming, isConfirmed }
+  return { approve, isConfirming }
 }
 
 export function useDeposit(amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -79,13 +79,13 @@ export function useDeposit(amount: string) {
     }
   }
 
-  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved, isConfirmed }
+  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
 }
 
 export function useGuildContribute(guildId: `0x${string}`, amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -111,13 +111,13 @@ export function useGuildContribute(guildId: `0x${string}`, amount: string) {
     }
   }
 
-  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved, isConfirmed }
+  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
 }
 
 export function useWithdraw(amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -132,7 +132,7 @@ export function useWithdraw(amount: string) {
     })
   }
 
-  return { withdraw, isConfirming, isConfirmed }
+  return { withdraw, isConfirming }
 }
 
 

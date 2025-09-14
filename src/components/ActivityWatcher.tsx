@@ -1,181 +1,193 @@
 
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { toast } from 'react-hot-toast'
-import { useAccount } from 'wagmi'
-import { usePublicClient } from 'wagmi'
+import { useEffect } from 'react';
+import { useAccount, usePublicClient } from 'wagmi';
+import { formatUnits, type Hex, zeroAddress } from 'viem';
+import { vault, quest, rewards } from '@/lib/contracts';
+import { vaultAbi } from '@/abis/StablecoinVault';
+import { questManagerAbi } from '@/abis/QuestManager';
+import { rewardsAbi } from '@/abis/RewardsController';
+import { useAppStore } from '@/store/useAppStore';
 
-import { vault, quest, rewards } from '@/lib/contracts'
-import { useAppStore } from '@/store/useAppStore'
+const DECIMALS = 18; // mUSDT
 
-export function ActivityWatcher() {
-  const { address } = useAccount()
-  const addActivity = useAppStore((state) => state.addActivity)
-  const client = usePublicClient()
+export default function ActivityWatcher() {
+  const { address } = useAccount();
+  const client = usePublicClient();
+  const addActivity = useAppStore((s) => s.addActivity);
 
+  // Vault: Deposit
   useEffect(() => {
-    if (!client || !address) return
-
-    // Watch Vault events
-    const unwatchVaultDeposit = client.watchContractEvent({
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
       address: vault().address,
-      abi: vault().abi,
+      abi: vaultAbi,
       eventName: 'Deposit',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          if (log.args.user === address) {
-            addActivity({
-              id: `deposit-${log.transactionHash}-${log.logIndex}`,
-              type: 'deposit',
-              amount: log.args.amount?.toString(),
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: log.args.user,
-            })
-            toast.success(`Deposit successful: ${log.args.amount}`)
-          }
-        })
+          const user = (log.args?.user as `0x${string}`) ?? zeroAddress;
+          const raw = log.args?.amount as bigint;
+          addActivity({
+            kind: 'deposit',
+            message: `Deposit`,
+            user,
+            value: formatUnits(raw ?? 0n, DECIMALS),
+            txHash: log.transactionHash as Hex,
+            at: Date.now(),
+          });
+        });
       },
-    })
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
 
-    const unwatchVaultWithdraw = client.watchContractEvent({
+  // Vault: Withdraw
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
       address: vault().address,
-      abi: vault().abi,
+      abi: vaultAbi,
       eventName: 'Withdraw',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          if (log.args.user === address) {
-            addActivity({
-              id: `withdraw-${log.transactionHash}-${log.logIndex}`,
-              type: 'withdraw',
-              amount: log.args.amount?.toString(),
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: log.args.user,
-            })
-            toast.success(`Withdraw successful: ${log.args.amount}`)
-          }
-        })
+          const user = (log.args?.user as `0x${string}`) ?? zeroAddress;
+          const raw = log.args?.amount as bigint;
+          addActivity({
+            kind: 'withdraw',
+            message: `Withdraw`,
+            user,
+            value: formatUnits(raw ?? 0n, DECIMALS),
+            txHash: log.transactionHash as Hex,
+            at: Date.now(),
+          });
+        });
       },
-    })
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
 
-    const unwatchGuildContributed = client.watchContractEvent({
+  // Vault: GuildContributed
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
       address: vault().address,
-      abi: vault().abi,
+      abi: vaultAbi,
       eventName: 'GuildContributed',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          if (log.args.from === address) {
-            addActivity({
-              id: `contribute-${log.transactionHash}-${log.logIndex}`,
-              type: 'contribute',
-              amount: log.args.amount?.toString(),
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: log.args.from,
-            })
-            toast.success(`Contributed to guild: ${log.args.amount}`)
-          }
-        })
+          const from = (log.args?.from as `0x${string}`) ?? zeroAddress;
+          const raw = log.args?.amount as bigint;
+          addActivity({
+            kind: 'guildContributed',
+            message: `Guild contribution`,
+            user: from,
+            guildId: log.args?.guildId as Hex,
+            value: formatUnits(raw ?? 0n, DECIMALS),
+            txHash: log.transactionHash as Hex,
+            at: Date.now(),
+          });
+        });
       },
-    })
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
 
-    const unwatchGuildFundsUnlocked = client.watchContractEvent({
+  // Vault: GuildFundsUnlocked
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
       address: vault().address,
-      abi: vault().abi,
+      abi: vaultAbi,
       eventName: 'GuildFundsUnlocked',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          if (log.args.members?.includes(address)) {
-            addActivity({
-              id: `unlocked-${log.transactionHash}-${log.logIndex}`,
-              type: 'complete',
-              amount: log.args.amountPerMember?.toString(),
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: address,
-            })
-            toast.success(`Guild funds unlocked! You received ${log.args.amountPerMember}`)
-          }
-        })
+          addActivity({
+            kind: 'guildUnlocked',
+            message: `Guild funds unlocked`,
+            guildId: log.args?.guildId as Hex,
+            value: formatUnits((log.args?.amountPerMember as bigint) ?? 0n, DECIMALS),
+            txHash: log.transactionHash as Hex,
+            at: Date.now(),
+            data: { members: log.args?.members as string[] },
+          });
+        });
       },
-    })
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
 
-    // Watch Quest events
-    const unwatchGuildCreated = client.watchContractEvent({
-      address: quest().address,
-      abi: quest().abi,
-      eventName: 'GuildCreated',
-      onLogs: (logs) => {
-        logs.forEach((log) => {
-          if (log.args.members?.includes(address)) {
-            addActivity({
-              id: `guild-created-${log.transactionHash}-${log.logIndex}`,
-              type: 'complete',
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: address,
-            })
-            toast.success(`Guild created: ${log.args.guildId}`)
-          }
-        })
-      },
-    })
-
-    const unwatchQuestCompleted = client.watchContractEvent({
-      address: quest().address,
-      abi: quest().abi,
-      eventName: 'QuestCompleted',
-      onLogs: (logs) => {
-        logs.forEach((log) => {
-          if (log.args.user === address) {
-            addActivity({
-              id: `quest-completed-${log.transactionHash}-${log.logIndex}`,
-              type: 'complete',
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: log.args.user,
-            })
-            toast.success(`Quest completed: ${log.args.questId}`)
-          }
-        })
-      },
-    })
-
-    // Watch Rewards events
-    const unwatchBadgeMinted = client.watchContractEvent({
+  // Rewards: BadgeMinted
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
       address: rewards().address,
-      abi: rewards().abi,
+      abi: rewardsAbi,
       eventName: 'BadgeMinted',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          if (log.args.to === address) {
-            addActivity({
-              id: `badge-minted-${log.transactionHash}-${log.logIndex}`,
-              type: 'complete',
-              txHash: log.transactionHash,
-              timestamp: Date.now(),
-              user: log.args.to,
-            })
-            toast.success(`New badge minted: Token ID ${log.args.tokenId}`)
-          }
-        })
+          addActivity({
+            kind: 'badgeMinted',
+            message: `Achievement badge minted`,
+            to: log.args?.to as `0x${string}`,
+            txHash: log.transactionHash as Hex,
+            at: Date.now(),
+            data: { tokenId: (log.args?.tokenId as bigint)?.toString() },
+          });
+        });
       },
-    })
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
 
-    return () => {
-      unwatchVaultDeposit?.()
-      unwatchVaultWithdraw?.()
-      unwatchGuildContributed?.()
-      unwatchGuildFundsUnlocked?.()
-      unwatchGuildCreated?.()
-      unwatchQuestCompleted?.()
-      unwatchBadgeMinted?.()
-    }
-  }, [address, addActivity, client])
+  // Quest: GuildCreated
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
+      address: quest().address,
+      abi: questManagerAbi,
+      eventName: 'GuildCreated',
+      onLogs: (logs) => {
+        logs.forEach((log) => {
+          const members = (log.args?.members as string[]) ?? [];
+          // If connected, you can choose to only show if I'm in the guild:
+          if (address && !members.includes(address)) return;
+          addActivity({
+            kind: 'guildCreated',
+            message: `Guild created`,
+            guildId: log.args?.guildId as Hex,
+            at: Date.now(),
+            data: { members },
+          });
+        });
+      },
+    });
+    return () => unwatch?.();
+  }, [client, addActivity, address]);
 
-  return null
+  // Quest: QuestCompleted
+  useEffect(() => {
+    if (!client) return;
+    const unwatch = client.watchContractEvent({
+      address: quest().address,
+      abi: questManagerAbi,
+      eventName: 'QuestCompleted',
+      onLogs: (logs) => {
+        logs.forEach((log) => {
+          addActivity({
+            kind: 'questCompleted',
+            message: `Quest completed`,
+            user: log.args?.user as `0x${string}`,
+            at: Date.now(),
+            data: { questId: log.args?.questId as bigint },
+          });
+        });
+      },
+    });
+    return () => unwatch?.();
+  }, [client, addActivity]);
+
+  return null;
 }
 
 
