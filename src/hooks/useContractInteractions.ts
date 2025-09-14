@@ -34,7 +34,7 @@ export function useTokenAllowance(tokenAddress: `0x${string}`, spenderAddress: `
 
 export function useApprove(tokenAddress: `0x${string}`, spenderAddress: `0x${string}`, amount: bigint) {
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -53,7 +53,7 @@ export function useApprove(tokenAddress: `0x${string}`, spenderAddress: `0x${str
 export function useDeposit(amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -85,7 +85,7 @@ export function useDeposit(amount: string) {
 export function useGuildContribute(guildId: `0x${string}`, amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -117,7 +117,7 @@ export function useGuildContribute(guildId: `0x${string}`, amount: string) {
 export function useWithdraw(amount: string) {
   useAccount()
   const { writeContract, data: hash } = useWriteContract()
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   })
 
