@@ -15,6 +15,7 @@ export type AppStats = {
   contributions?: number;
   guilds?: number;
   badges?: number;
+  questsCompleted?: number;  // Added this field
 };
 
 export type ActivityEvent = {
