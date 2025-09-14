@@ -14,7 +14,7 @@ type GuildTuple = readonly [id: Hex, members: readonly `0x${string}`[]];
 
 export default function GuildPage() {
   const params = useParams();
-  const raw = String(params.guildId ?? '');
+  const raw = String(params?.guildId ?? "");
 
   const guildId = useMemo<Hex | null>(() => {
     const v = raw.startsWith('0x') ? (raw as Hex) : (`0x${raw}` as Hex);
