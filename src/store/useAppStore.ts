@@ -16,6 +16,7 @@ export type AppStats = {
   guilds: number;
   badges: number;
   questsCompleted: number;
+  sbtsMinted: number;     // NEW: used by Home page
 };
 
 export type ActivityEvent = {
@@ -81,6 +82,7 @@ export const useAppStore = create<AppState>((set) => ({
     guilds: 0,
     badges: 0,
     questsCompleted: 0,
+    sbtsMinted: 0,
   },
   setStats: (partial) =>
     set((s) => ({ stats: { ...s.stats, ...partial } })),
