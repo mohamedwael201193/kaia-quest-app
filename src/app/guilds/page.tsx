@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Shield, Crown, Plus } from 'lucide-react'
 import { useState } from 'react'
+import type { Hex } from 'viem'
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { quest } from '@/lib/contracts'
 import { useRouter } from 'next/navigation'
@@ -28,7 +29,7 @@ export default function GuildsPage() {
       abi: quest().abi,
       address: quest().address,
       functionName: 'createGuild',
-      args: [newGuildMembers.length > 0 ? newGuildMembers : []],
+      args: [newGuildMembers.length > 0 ? (newGuildMembers as Hex[]) : []],
     })
   }
 

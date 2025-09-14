@@ -1,11 +1,12 @@
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Hex, zeroAddress } from 'viem';
+import type { Hex } from 'viem';
+import { zeroAddress } from 'viem';
 import { usePublicClient, useReadContract } from 'wagmi';
-import { vault } from '@/lib/contracts';
-import { quest } from '@/lib/contracts'; // for address references only if you need
+import { quest, vault } from '@/lib/contracts';
 import { questManagerAbi } from '@/abis/QuestManager';
 import { vaultAbi } from '@/abis/StablecoinVault';
 
@@ -14,6 +15,7 @@ type GuildTuple = readonly [id: Hex, members: readonly `0x${string}`[]];
 export default function GuildPage() {
   const params = useParams();
   const raw = String(params.guildId ?? '');
+
   const guildId = useMemo<Hex | null>(() => {
     const v = raw.startsWith('0x') ? (raw as Hex) : (`0x${raw}` as Hex);
     return v.length === 66 ? v : null; // bytes32
@@ -22,12 +24,13 @@ export default function GuildPage() {
   const client = usePublicClient();
   const [activity, setActivity] = useState<string[]>([]);
 
-  // 1) Read guild members via public mapping accessor: guilds(bytes32) -> (bytes32,address[])
+  // 1) Read guild members via the public mapping accessor: guilds(bytes32) -> (bytes32,address[])
   const { data: guildData } = useReadContract({
     address: quest().address,
     abi: questManagerAbi,
     functionName: 'guilds',
     args: guildId ? [guildId] : undefined,
+    // wagmi v1 exposes TanStack options under "query"
     query: { enabled: !!guildId },
   });
 
@@ -39,13 +42,14 @@ export default function GuildPage() {
 
   // 2) Watch Vault events for this guild (GuildContributed, GuildFundsUnlocked)
   useEffect(() => {
-    if (!guildId) return;
-    // viem-style watcher on the public client
+    // Guard for both: client can be undefined until provider is ready.
+    if (!client || !guildId) return;
+
     const unwatchContrib = client.watchContractEvent({
       address: vault().address,
       abi: vaultAbi,
       eventName: 'GuildContributed',
-      args: { guildId }, // indexed: filters by this guild only
+      args: { guildId }, // indexed filter
       onLogs: (logs) => {
         logs.forEach((l) => {
           const from = (l.args?.from as string) ?? zeroAddress;
@@ -59,7 +63,7 @@ export default function GuildPage() {
       address: vault().address,
       abi: vaultAbi,
       eventName: 'GuildFundsUnlocked',
-      args: { guildId }, // indexed
+      args: { guildId }, // indexed filter
       onLogs: (logs) => {
         logs.forEach((l) => {
           const per = l.args?.amountPerMember?.toString?.() ?? '0';
