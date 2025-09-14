@@ -79,7 +79,7 @@ export function useDeposit(amount: string) {
     }
   }
 
-  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
+  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved, isConfirmed }
 }
 
 export function useGuildContribute(guildId: `0x${string}`, amount: string) {
@@ -111,7 +111,7 @@ export function useGuildContribute(guildId: `0x${string}`, amount: string) {
     }
   }
 
-  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
+  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved, isConfirmed }
 }
 
 export function useWithdraw(amount: string) {
