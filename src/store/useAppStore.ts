@@ -1,21 +1,21 @@
 import { create } from 'zustand';
 import type { Hex } from 'viem';
 
-// LIFF profile shape (minimal)
+// LIFF profile (minimal)
 export type LiffProfile = {
   userId: string;
   displayName: string;
   pictureUrl?: string;
 } | null;
 
-// Dashboard / homepage stats (make keys optional; pages can fill what they need)
+// Concrete stats used by the homepage
 export type AppStats = {
-  tvl?: string;              // formatted
-  deposits?: number;
-  contributions?: number;
-  guilds?: number;
-  badges?: number;
-  questsCompleted?: number;  // Added this field
+  tvl: string;            // formatted string, e.g., "0" or "0.00"
+  deposits: number;
+  contributions: number;
+  guilds: number;
+  badges: number;
+  questsCompleted: number;
 };
 
 export type ActivityEvent = {
@@ -43,7 +43,7 @@ type AppState = {
   // App mode
   isDemoMode: boolean;
   setDemoMode: (isDemoMode: boolean) => void;
-  
+
   // LIFF state
   liffProfile: LiffProfile;
   liffReady: boolean;         // canonical flag
@@ -65,7 +65,7 @@ export const useAppStore = create<AppState>((set) => ({
   // App mode
   isDemoMode: false,
   setDemoMode: (isDemoMode) => set({ isDemoMode }),
-  
+
   // LIFF
   liffProfile: null,
   liffReady: false,
@@ -73,8 +73,15 @@ export const useAppStore = create<AppState>((set) => ({
   setLiffProfile: (p) => set({ liffProfile: p }),
   setLiffReady: (ready) => set({ liffReady: ready, isLiffReady: ready }),
 
-  // Stats
-  stats: {},
+  // Stats: non-undefined defaults so `.toLocaleString()` is always safe
+  stats: {
+    tvl: '0',
+    deposits: 0,
+    contributions: 0,
+    guilds: 0,
+    badges: 0,
+    questsCompleted: 0,
+  },
   setStats: (partial) =>
     set((s) => ({ stats: { ...s.stats, ...partial } })),
 
