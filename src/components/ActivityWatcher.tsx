@@ -25,7 +25,14 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.user === address) {
-            addActivity(`You deposited ${log.args.amount} into the vault.`)
+            addActivity({
+              id: `deposit-${log.transactionHash}-${log.logIndex}`,
+              type: 'deposit',
+              amount: log.args.amount?.toString(),
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: log.args.user,
+            })
             toast.success(`Deposit successful: ${log.args.amount}`)
           }
         })
@@ -39,7 +46,14 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.user === address) {
-            addActivity(`You withdrew ${log.args.amount} from the vault.`)
+            addActivity({
+              id: `withdraw-${log.transactionHash}-${log.logIndex}`,
+              type: 'withdraw',
+              amount: log.args.amount?.toString(),
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: log.args.user,
+            })
             toast.success(`Withdraw successful: ${log.args.amount}`)
           }
         })
@@ -53,7 +67,14 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.from === address) {
-            addActivity(`You contributed ${log.args.amount} to guild ${log.args.guildId}.`)
+            addActivity({
+              id: `contribute-${log.transactionHash}-${log.logIndex}`,
+              type: 'contribute',
+              amount: log.args.amount?.toString(),
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: log.args.from,
+            })
             toast.success(`Contributed to guild: ${log.args.amount}`)
           }
         })
@@ -67,7 +88,14 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.members?.includes(address)) {
-            addActivity(`Guild ${log.args.guildId} funds unlocked! You received ${log.args.amountPerMember}.`)
+            addActivity({
+              id: `unlocked-${log.transactionHash}-${log.logIndex}`,
+              type: 'complete',
+              amount: log.args.amountPerMember?.toString(),
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: address,
+            })
             toast.success(`Guild funds unlocked! You received ${log.args.amountPerMember}`)
           }
         })
@@ -82,7 +110,13 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.members?.includes(address)) {
-            addActivity(`You created or joined guild ${log.args.guildId}.`)
+            addActivity({
+              id: `guild-created-${log.transactionHash}-${log.logIndex}`,
+              type: 'complete',
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: address,
+            })
             toast.success(`Guild created: ${log.args.guildId}`)
           }
         })
@@ -96,7 +130,13 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.user === address) {
-            addActivity(`You completed quest ${log.args.questId}.`)
+            addActivity({
+              id: `quest-completed-${log.transactionHash}-${log.logIndex}`,
+              type: 'complete',
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: log.args.user,
+            })
             toast.success(`Quest completed: ${log.args.questId}`)
           }
         })
@@ -111,7 +151,13 @@ export function ActivityWatcher() {
       onLogs: (logs) => {
         logs.forEach((log) => {
           if (log.args.to === address) {
-            addActivity(`You minted a new badge: Token ID ${log.args.tokenId}.`)
+            addActivity({
+              id: `badge-minted-${log.transactionHash}-${log.logIndex}`,
+              type: 'complete',
+              txHash: log.transactionHash,
+              timestamp: Date.now(),
+              user: log.args.to,
+            })
             toast.success(`New badge minted: Token ID ${log.args.tokenId}`)
           }
         })
