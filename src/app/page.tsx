@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useEffect } from 'react'
@@ -6,21 +7,22 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/store/useAppStore'
 import { liffService } from '@/lib/liff'
-import { 
-  TrendingUp, 
-  Target, 
+import {
+  TrendingUp,
+  Target,
   Award,
   ArrowRight,
   Sparkles
 } from 'lucide-react'
+import { MapScene } from '@/components/three/MapScene'
 
 export default function HomePage() {
-  const { 
-    liffProfile, 
-    setLiffProfile, 
+  const {
+    liffProfile,
+    setLiffProfile,
     setLiffReady,
     stats,
-    isDemoMode 
+    isDemoMode
   } = useAppStore()
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function HomePage() {
       try {
         const success = await liffService.init()
         setLiffReady(success)
-        
+
         if (success && liffService.isLoggedIn()) {
           const profile = await liffService.getProfile()
           setLiffProfile(profile)
@@ -79,13 +81,8 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* 3D Scene or Fallback */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/hero-fallback.jpg)' }}
-        >
-          <div className="absolute inset-0 bg-ink/60" />
-        </div>
-        
+        <MapScene className="absolute inset-0" />
+
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <motion.div
@@ -98,11 +95,11 @@ export default function HomePage() {
                 Kaia Quest
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Embark on epic adventures, build guilds, and earn rewards in the ultimate Web3 treasure hunt
             </p>
-            
+
             {!liffProfile ? (
               <Button
                 onClick={handleLogin}
@@ -117,8 +114,8 @@ export default function HomePage() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-center space-x-3 mb-4">
-                  <img 
-                    src={liffProfile.pictureUrl} 
+                  <img
+                    src={liffProfile.pictureUrl}
                     alt={liffProfile.displayName}
                     className="w-12 h-12 rounded-full border-2 border-gold"
                   />
@@ -127,7 +124,7 @@ export default function HomePage() {
                     <p className="text-gold">{liffProfile.displayName}</p>
                   </div>
                 </div>
-                
+
                 <Button
                   asChild
                   size="lg"
@@ -142,7 +139,7 @@ export default function HomePage() {
                 </Button>
               </div>
             )}
-            
+
             {isDemoMode && (
               <p className="text-sm text-gold/80 mt-4">
                 Demo Mode Active - Experience the full adventure without blockchain transactions
@@ -150,7 +147,7 @@ export default function HomePage() {
             )}
           </motion.div>
         </div>
-        
+
         {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -189,7 +186,7 @@ export default function HomePage() {
               Thousands of adventurers are already exploring, questing, and earning rewards
             </p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {statsData.map((stat, index) => {
               const Icon = stat.icon
@@ -201,7 +198,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <Card className="bg-parchment/10 border-gold/20 backdrop-blur-sm hover:bg-parchment/20 transition-colors">
+                  <Card className="bg-parchment/10 border-gold/20 backdrop-blur-sm hover:bg-parchment/20 transition-colors h-full">
                     <CardContent className="p-8 text-center">
                       <Icon className={`h-12 w-12 mx-auto mb-4 ${stat.color}`} />
                       <div className="text-3xl font-bold text-white mb-2">
@@ -236,7 +233,7 @@ export default function HomePage() {
               Discover what makes Kaia Quest the ultimate Web3 adventure platform
             </p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -296,3 +293,5 @@ export default function HomePage() {
     </div>
   )
 }
+
+

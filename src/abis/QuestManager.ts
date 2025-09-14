@@ -1,101 +1,16 @@
 export const questManagerAbi = [
-  {
-    inputs: [{ name: 'members', type: 'address[]' }],
-    name: 'createGuild',
-    outputs: [{ name: 'guildId', type: 'bytes32' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { name: 'guildId', type: 'bytes32' },
-      { name: 'token', type: 'address' },
-      { name: 'goal', type: 'uint256' },
-      { name: 'receiver', type: 'address' },
-    ],
-    name: 'startGuildQuest',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { name: 'guildId', type: 'bytes32' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    name: 'contribute',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { name: 'guildId', type: 'bytes32' },
-      { name: 'badgeId', type: 'uint256' },
-    ],
-    name: 'completeGuildQuest',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'guildId', type: 'bytes32' }],
-    name: 'getGuildInfo',
-    outputs: [
-      {
-        components: [
-          { name: 'members', type: 'address[]' },
-          { name: 'token', type: 'address' },
-          { name: 'goal', type: 'uint256' },
-          { name: 'raised', type: 'uint256' },
-          { name: 'receiver', type: 'address' },
-          { name: 'isActive', type: 'bool' },
-        ],
-        name: '',
-        type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: 'guildId', type: 'bytes32' },
-      { indexed: false, name: 'members', type: 'address[]' },
-    ],
-    name: 'GuildCreated',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: 'guildId', type: 'bytes32' },
-      { indexed: true, name: 'token', type: 'address' },
-      { indexed: false, name: 'goal', type: 'uint256' },
-      { indexed: true, name: 'receiver', type: 'address' },
-    ],
-    name: 'QuestStarted',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: 'guildId', type: 'bytes32' },
-      { indexed: true, name: 'contributor', type: 'address' },
-      { indexed: false, name: 'amount', type: 'uint256' },
-    ],
-    name: 'Contribution',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: 'guildId', type: 'bytes32' },
-      { indexed: false, name: 'badgeId', type: 'uint256' },
-    ],
-    name: 'QuestCompleted',
-    type: 'event',
-  },
-] as const
+  { type: 'function', name: 'createQuest', stateMutability: 'nonpayable', inputs: [
+    { name: 'title', type: 'string' }, { name: 'goal', type: 'uint256' }, { name: 'isGuildQuest', type: 'bool' }], outputs: [] },
+  { type: 'function', name: 'createGuild', stateMutability: 'nonpayable', inputs: [{ name: 'members', type: 'address[]' }], outputs: [] },
+  { type: 'function', name: 'getQuest', stateMutability: 'view', inputs: [{ name: 'questId', type: 'uint256' }], outputs: [{
+    components: [
+      { name: 'id', type: 'uint256' }, { name: 'title', type: 'string' },
+      { name: 'goal', type: 'uint256' }, { name: 'isGuildQuest', type: 'bool' }
+    ], type: 'tuple' }] },
+  { type: 'function', name: 'completeQuest', stateMutability: 'nonpayable', inputs: [{ name: 'questId', type: 'uint256' }], outputs: [] },
+  { type: 'event', name: 'GuildCreated', inputs: [
+    { indexed: true, name: 'guildId', type: 'bytes32' }, { indexed: false, name: 'members', type: 'address[]' }], anonymous: false },
+  { type: 'event', name: 'QuestCompleted', inputs: [
+    { indexed: true, name: 'user', type: 'address' }, { indexed: false, name: 'questId', type: 'uint256' }], anonymous: false },
+] as const;
 

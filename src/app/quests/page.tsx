@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react'
@@ -8,40 +9,40 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useAppStore } from '@/store/useAppStore'
-import { 
-  Coins, 
-  TrendingUp, 
-  Users, 
+import {
+  Coins,
+  TrendingUp,
+  Users,
   Zap,
   ArrowRight,
   Sparkles
 } from 'lucide-react'
+import { useDeposit } from '@/hooks/useContractInteractions'
+
 
 export default function QuestsPage() {
   const [showCoinBurst, setShowCoinBurst] = useState(false)
-  const { 
-    isDemoMode, 
-    questProgress, 
+  const {
+    isDemoMode,
+    questProgress,
     incrementProgress,
-    addActivity 
+    addActivity
   } = useAppStore()
+
+  const depositAmount = '0.5' // 0.5 mUSDT
+  const { deposit, isConfirming, isApproved } = useDeposit(depositAmount)
+
 
   const handleRoundUpQuest = () => {
     if (isDemoMode) {
       // Demo mode: simulate the quest
       setShowCoinBurst(true)
       incrementProgress(0.01)
-      
-      addActivity({
-        id: Date.now().toString(),
-        type: 'deposit',
-        amount: '0.50',
-        timestamp: Date.now(),
-        user: 'Demo User'
-      })
+
+      addActivity(`Simulated deposit of ${depositAmount} mUSDT.`)
     } else {
-      // Real mode: would interact with smart contracts
-      console.log('Real quest interaction would happen here')
+      // Real mode: interact with smart contracts
+      deposit()
     }
   }
 
@@ -54,7 +55,8 @@ export default function QuestsPage() {
       reward: "50 KAIA",
       type: "personal" as const,
       onAction: handleRoundUpQuest,
-      actionLabel: "Simulate Purchase"
+      actionLabel: isDemoMode ? "Simulate Purchase" : (isApproved ? "Deposit 0.5 mUSDT" : "Approve USDT"),
+      disabled: !isDemoMode && isConfirming
     },
     {
       title: "Daily Login Streak",
@@ -73,8 +75,9 @@ export default function QuestsPage() {
       goal: "Deposit any amount",
       reward: "100 KAIA + SBT",
       type: "personal" as const,
-      onAction: () => console.log('First deposit'),
-      actionLabel: questProgress > 0 ? "Completed!" : "Make Deposit"
+      onAction: handleRoundUpQuest, // Reusing for simplicity, could be a separate deposit function
+      actionLabel: isDemoMode ? (questProgress > 0 ? "Completed!" : "Make Deposit") : (isApproved ? "Make Deposit" : "Approve USDT"),
+      disabled: !isDemoMode && isConfirming
     }
   ]
 
@@ -103,11 +106,11 @@ export default function QuestsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-ink to-ink/90 pt-20">
-      <CoinBurst 
-        trigger={showCoinBurst} 
-        onComplete={() => setShowCoinBurst(false)} 
+      <CoinBurst
+        trigger={showCoinBurst}
+        onComplete={() => setShowCoinBurst(false)}
       />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -182,7 +185,7 @@ export default function QuestsPage() {
               Personal Quests
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {personalQuests.map((quest, index) => (
               <motion.div
@@ -210,7 +213,7 @@ export default function QuestsPage() {
               Guild Quests
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {guildQuests.map((quest, index) => (
               <motion.div
@@ -287,4 +290,5 @@ export default function QuestsPage() {
     </div>
   )
 }
+
 

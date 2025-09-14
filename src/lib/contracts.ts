@@ -1,69 +1,55 @@
 import { createPublicClient, http, getContract } from 'viem'
-import { kaia, kairos } from './chains'
-import { env } from './env'
+import { kairos } from './chains'
 import { erc20Abi } from '@/abis/erc20'
-import { stablecoinVaultAbi } from '@/abis/StablecoinVault'
+import { vaultAbi } from '@/abis/StablecoinVault'
 import { questManagerAbi } from '@/abis/QuestManager'
-import { rewardsControllerAbi } from '@/abis/RewardsController'
+import { rewardsAbi } from '@/abis/RewardsController'
 
 // Contract addresses
 export const ADDRESSES = {
-  USDT: env.USDT_ADDRESS as `0x${string}`,
-  VAULT: env.VAULT_ADDRESS as `0x${string}`,
-  QUEST: env.QUEST_ADDRESS as `0x${string}`,
-  REWARDS: env.REWARDS_ADDRESS as `0x${string}`,
+  USDT: process.env.NEXT_PUBLIC_USDT as `0x${string}`,
+  VAULT: process.env.NEXT_PUBLIC_VAULT as `0x${string}`,
+  QUEST: process.env.NEXT_PUBLIC_QUEST as `0x${string}`,
+  REWARDS: process.env.NEXT_PUBLIC_REWARDS as `0x${string}`,
 }
 
-// Public clients
-export const publicClients = {
-  [kaia.id]: createPublicClient({
-    chain: kaia,
-    transport: http(),
-  }),
-  [kairos.id]: createPublicClient({
-    chain: kairos,
-    transport: http(),
-  }),
-}
-
-export function getPublicClient(chainId: number) {
-  return publicClients[chainId as keyof typeof publicClients]
-}
+// Public client for Kairos
+export const publicClient = createPublicClient({
+  chain: kairos,
+  transport: http(kairos.rpcUrls.default.http[0]),
+})
 
 // Contract helpers
-export function getUsdtContract(chainId: number) {
-  const client = getPublicClient(chainId)
+export function usdt() {
   return getContract({
     address: ADDRESSES.USDT,
     abi: erc20Abi,
-    client,
+    client: publicClient,
   })
 }
 
-export function getVaultContract(chainId: number) {
-  const client = getPublicClient(chainId)
+export function vault() {
   return getContract({
     address: ADDRESSES.VAULT,
-    abi: stablecoinVaultAbi,
-    client,
+    abi: vaultAbi,
+    client: publicClient,
   })
 }
 
-export function getQuestContract(chainId: number) {
-  const client = getPublicClient(chainId)
+export function quest() {
   return getContract({
     address: ADDRESSES.QUEST,
     abi: questManagerAbi,
-    client,
+    client: publicClient,
   })
 }
 
-export function getRewardsContract(chainId: number) {
-  const client = getPublicClient(chainId)
+export function rewards() {
   return getContract({
     address: ADDRESSES.REWARDS,
-    abi: rewardsControllerAbi,
-    client,
+    abi: rewardsAbi,
+    client: publicClient,
   })
 }
+
 

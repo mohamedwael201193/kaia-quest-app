@@ -1,14 +1,17 @@
+
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { 
-  OrbitControls, 
-  Environment, 
+import {
+  OrbitControls,
+  Environment,
   Html,
-  useProgress
+  useProgress,
+  useGLTF,
 } from '@react-three/drei'
 import { useAppStore } from '@/store/useAppStore'
+import { Group } from 'three'
 
 function Loader() {
   const { progress } = useProgress()
@@ -22,46 +25,40 @@ function Loader() {
   )
 }
 
-function SimpleScene() {
+function AdventurerModel() {
+  const { scene } = useGLTF('/models/low_poly_adventurer.glb')
   const questProgress = useAppStore((state) => state.questProgress)
-  
-  return (
-    <group>
-      {/* Simple placeholder geometry */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2, 0.1, 2]} />
-        <meshStandardMaterial color="#8B4513" />
-      </mesh>
-      
-      {/* Treasure chest placeholder */}
-      <mesh position={[1, 0.5, 1]}>
-        <boxGeometry args={[0.5, 0.3, 0.3]} />
-        <meshStandardMaterial 
-          color="#FFD700" 
-          emissive="#FFD700"
-          emissiveIntensity={0.2 + questProgress * 0.3}
-        />
-      </mesh>
-      
-      {/* Adventurer placeholder */}
-      <mesh position={[-1 + questProgress * 2, 0.5, 0]}>
-        <capsuleGeometry args={[0.2, 0.8]} />
-        <meshStandardMaterial color="#4A90E2" />
-      </mesh>
-    </group>
-  )
+  const ref = useRef<Group>(null)
+
+  useFrame(() => {
+    if (ref.current) {
+      ref.current.position.x = -1.5 + questProgress * 3 // Move adventurer based on progress
+    }
+  })
+
+  return <primitive object={scene} scale={0.01} position={[-1.5, 0, 0]} ref={ref} />
+}
+
+function TreasureChestModel() {
+  const { scene } = useGLTF('/models/low_poly_treasure_chest.glb')
+  return <primitive object={scene} scale={0.01} position={[1.5, 0, 0]} />
+}
+
+function MapModel() {
+  const { scene } = useGLTF('/models/low_poly_map.glb')
+  return <primitive object={scene} scale={0.01} position={[0, -0.5, 0]} rotation={[Math.PI / 2, 0, 0]} />
 }
 
 function CameraController() {
   const { camera, mouse } = useThree()
-  
+
   useFrame(() => {
     // Gentle camera movement based on mouse position
     camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02
     camera.position.y += (mouse.y * 0.5 - camera.position.y + 2) * 0.02
     camera.lookAt(0, 0, 0)
   })
-  
+
   return null
 }
 
@@ -79,22 +76,24 @@ export function MapScene({ className }: MapSceneProps) {
         <Suspense fallback={<Loader />}>
           {/* Lighting */}
           <ambientLight intensity={0.4} />
-          <directionalLight 
-            position={[10, 10, 5]} 
+          <directionalLight
+            position={[10, 10, 5]}
             intensity={1}
             castShadow
           />
           <pointLight position={[0, 5, 0]} intensity={0.5} color="#FFD700" />
-          
+
           {/* Environment */}
           <Environment preset="night" />
-          
-          {/* Simple 3D Scene */}
-          <SimpleScene />
-          
+
+          {/* 3D Models */}
+          <MapModel />
+          <AdventurerModel />
+          <TreasureChestModel />
+
           {/* Camera Controls */}
           <CameraController />
-          <OrbitControls 
+          <OrbitControls
             enablePan={false}
             enableZoom={false}
             maxPolarAngle={Math.PI / 2}
@@ -105,4 +104,5 @@ export function MapScene({ className }: MapSceneProps) {
     </div>
   )
 }
+
 

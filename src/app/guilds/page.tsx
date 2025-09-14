@@ -1,11 +1,59 @@
+
 'use client'
 
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users, Shield, Crown, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { quest } from '@/lib/contracts'
+import { useRouter } from 'next/navigation'
+import { useAppStore } from '@/store/useAppStore'
+import { watchContractEvent } from 'wagmi/actions'
+import { publicClient } from '@/lib/contracts'
+import { toast } from 'react-hot-toast'
 
 export default function GuildsPage() {
+  const [newGuildMembers] = useState<string[]>([]) // For simplicity, assume a single member for now
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
+  const router = useRouter()
+  const addActivity = useAppStore((state) => state.addActivity)
+
+  const handleCreateGuild = () => {
+    writeContract({
+      abi: quest().abi,
+      address: quest().address,
+      functionName: 'createGuild',
+      args: [newGuildMembers.length > 0 ? newGuildMembers : []],
+    })
+  }
+
+  // Watch for GuildCreated event
+  useState(() => {
+    if (isConfirmed) {
+      const unwatch = watchContractEvent(publicClient, {
+        address: quest().address,
+        abi: quest().abi,
+        eventName: 'GuildCreated',
+        onLogs: (logs) => {
+          logs.forEach((log) => {
+            const guildId = log.args.guildId
+            if (guildId) {
+              addActivity(`New guild created with ID: ${guildId}`)
+              toast.success(`Guild created successfully!`)
+              router.push(`/guilds/${guildId}`)
+            }
+          })
+          unwatch() // Unsubscribe after finding the event
+        },
+      })
+    }
+  }, [isConfirmed, addActivity, router])
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-ink to-ink/90 pt-20">
       <div className="container mx-auto px-4 py-8">
@@ -88,13 +136,13 @@ export default function GuildsPage() {
           transition={{ delay: 0.4 }}
           className="text-center mt-12"
         >
-          <Button variant="gold" size="lg">
-            <Plus className="mr-2 h-5 w-5" />
-            Create New Guild
+          <Button variant="gold" size="lg" onClick={handleCreateGuild} disabled={isConfirming}>
+            {isConfirming ? 'Creating Guild...' : <><Plus className="mr-2 h-5 w-5" />Create New Guild</>}
           </Button>
         </motion.div>
       </div>
     </div>
   )
 }
+
 

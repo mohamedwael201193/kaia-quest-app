@@ -1,17 +1,17 @@
+
 'use client'
 
 import { createConfig, http } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
-import { kaia, kairos } from './chains'
+import { kairos } from './chains'
 
 const config = createConfig({
-  chains: [kaia, kairos],
+  chains: [kairos],
   connectors: [injected()],
   transports: {
-    [kaia.id]: http(),
-    [kairos.id]: http(),
+    [kairos.id]: http(kairos.rpcUrls.default.http[0]),
   },
 })
 
@@ -28,4 +28,5 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 }
 
 export { config }
+
 

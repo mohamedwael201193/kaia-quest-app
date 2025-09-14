@@ -1,5 +1,4 @@
 import liff from '@line/liff'
-import { env } from './env'
 
 export interface LiffProfile {
   displayName: string
@@ -9,12 +8,21 @@ export interface LiffProfile {
 
 class LiffService {
   private initialized = false
+  private liffId: string | undefined
+
+  constructor() {
+    this.liffId = process.env.NEXT_PUBLIC_LIFF_ID
+  }
 
   async init(): Promise<boolean> {
     if (this.initialized) return true
-    
+    if (!this.liffId) {
+      console.warn('LIFF_ID is not set. LIFF features will be disabled.')
+      return false
+    }
+
     try {
-      await liff.init({ liffId: env.LIFF_ID })
+      await liff.init({ liffId: this.liffId })
       this.initialized = true
       return true
     } catch (error) {
@@ -25,10 +33,11 @@ class LiffService {
 
   async login(): Promise<void> {
     if (!this.initialized) {
-      await this.init()
+      const success = await this.init()
+      if (!success) return
     }
     
-    if (!liff.isLoggedIn()) {
+    if (!liff.isLoggedIn() && !liff.isInClient()) {
       liff.login()
     }
   }
@@ -60,26 +69,29 @@ class LiffService {
   }
 
   async shareTargetPicker(message: string, url?: string): Promise<void> {
-    if (!this.initialized) return
+    if (!this.initialized || !liff.isApiAvailable('shareTargetPicker')) return
     
-    if (liff.isApiAvailable('shareTargetPicker')) {
-      try {
-        await liff.shareTargetPicker([
-          {
-            type: 'text',
-            text: message + (url ? `\n${url}` : ''),
-          },
-        ])
-      } catch (error) {
-        console.error('Share failed:', error)
-      }
+    try {
+      await liff.shareTargetPicker([
+        {
+          type: 'text',
+          text: message + (url ? `\n${url}` : ''),
+        },
+      ])
+    } catch (error) {
+      console.error('Share failed:', error)
     }
   }
 
   isInClient(): boolean {
     return this.initialized && liff.isInClient()
   }
+
+  isDesktop(): boolean {
+    return liff.isInClient() && liff.getOS() === 'web'
+  }
 }
 
 export const liffService = new LiffService()
+
 

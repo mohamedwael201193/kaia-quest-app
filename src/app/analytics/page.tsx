@@ -1,3 +1,4 @@
+
 'use client'
 
 import { motion } from 'framer-motion'
@@ -5,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, Users, Award, DollarSign } from 'lucide-react'
 
 export default function AnalyticsPage() {
+  const DUNE_TVL_URL = process.env.NEXT_PUBLIC_DUNE_TVL
+  const DUNE_SBT_URL = process.env.NEXT_PUBLIC_DUNE_SBT
+  const DUNE_GUILDS_URL = process.env.NEXT_PUBLIC_DUNE_GUILDS
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-ink to-ink/90 pt-20">
       <div className="container mx-auto px-4 py-8">
@@ -90,9 +95,19 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-white">TVL Growth</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center text-gray-400">
-                  <p>Dune Analytics Dashboard would be embedded here</p>
-                </div>
+                {DUNE_TVL_URL ? (
+                  <iframe
+                    src={DUNE_TVL_URL}
+                    width="100%"
+                    height="300"
+                    title="TVL Growth"
+                    className="border-0 rounded-lg"
+                  ></iframe>
+                ) : (
+                  <div className="h-64 flex items-center justify-center text-gray-400">
+                    <p>Dune Analytics Dashboard for TVL would be embedded here</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -104,12 +119,50 @@ export default function AnalyticsPage() {
           >
             <Card className="bg-parchment/10 border-gold/20">
               <CardHeader>
+                <CardTitle className="text-white">SBTs Minted</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {DUNE_SBT_URL ? (
+                  <iframe
+                    src={DUNE_SBT_URL}
+                    width="100%"
+                    height="300"
+                    title="SBTs Minted"
+                    className="border-0 rounded-lg"
+                  ></iframe>
+                ) : (
+                  <div className="h-64 flex items-center justify-center text-gray-400">
+                    <p>Dune Analytics Dashboard for SBTs would be embedded here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="lg:col-span-2"
+          >
+            <Card className="bg-parchment/10 border-gold/20">
+              <CardHeader>
                 <CardTitle className="text-white">Guild Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center text-gray-400">
-                  <p>Guild metrics dashboard would be embedded here</p>
-                </div>
+                {DUNE_GUILDS_URL ? (
+                  <iframe
+                    src={DUNE_GUILDS_URL}
+                    width="100%"
+                    height="300"
+                    title="Guild Activity"
+                    className="border-0 rounded-lg"
+                  ></iframe>
+                ) : (
+                  <div className="h-64 flex items-center justify-center text-gray-400">
+                    <p>Dune Analytics Dashboard for Guilds would be embedded here</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -118,4 +171,5 @@ export default function AnalyticsPage() {
     </div>
   )
 }
+
 

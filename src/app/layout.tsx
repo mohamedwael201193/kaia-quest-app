@@ -3,6 +3,7 @@ import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/lib/wallet";
 import { Header } from "@/components/Header";
+import { ActivityWatcher } from "@/components/ActivityWatcher";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-ink text-white`}>
         <WalletProvider>
           <Header />
+          <ActivityWatcher />
           <main>{children}</main>
         </WalletProvider>
       </body>
