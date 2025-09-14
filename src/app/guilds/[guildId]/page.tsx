@@ -15,12 +15,8 @@ import { toast } from 'react-hot-toast'
 import { watchContractEvent } from 'wagmi/actions'
 
 interface GuildInfo {
+  id: `0x${string}`
   members: `0x${string}`[]
-  token: `0x${string}`
-  goal: bigint
-  raised: bigint
-  receiver: `0x${string}`
-  isActive: boolean
 }
 
 export default function GuildDetailPage({ params }: { params: { guildId: string } }) {
@@ -42,7 +38,7 @@ export default function GuildDetailPage({ params }: { params: { guildId: string 
         const data = await publicClient.readContract({
           address: quest().address,
           abi: quest().abi,
-          functionName: 'getGuildInfo',
+          functionName: 'guilds',
           args: [guildId as `0x${string}`],
         })
         setGuildInfo(data as GuildInfo)
@@ -86,8 +82,6 @@ export default function GuildDetailPage({ params }: { params: { guildId: string 
       </div>
     )
   }
-
-  const progress = guildInfo.goal > 0 ? Number((guildInfo.raised * 100n) / guildInfo.goal) : 0
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-ink to-ink/90 pt-20">
@@ -134,15 +128,15 @@ export default function GuildDetailPage({ params }: { params: { guildId: string 
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300 mb-2">Goal: {guildInfo.goal.toString()} mUSDT</p>
-                <p className="text-gray-300 mb-4">Raised: {guildInfo.raised.toString()} mUSDT</p>
+                <p className="text-gray-300 mb-2">Goal: N/A</p>
+                <p className="text-gray-300 mb-4">Raised: N/A</p>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
                   <div
                     className="bg-jade h-2.5 rounded-full"
-                    style={{ width: `${progress > 100 ? 100 : progress}%` }}
+                    style={{ width: `0%` }}
                   ></div>
                 </div>
-                <p className="text-sm text-gray-400 mt-2">{progress}% Completed</p>
+                <p className="text-sm text-gray-400 mt-2">0% Completed</p>
 
                 <div className="mt-6">
                   <input

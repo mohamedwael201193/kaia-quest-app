@@ -8,9 +8,15 @@ export const questManagerAbi = [
       { name: 'goal', type: 'uint256' }, { name: 'isGuildQuest', type: 'bool' }
     ], type: 'tuple' }] },
   { type: 'function', name: 'completeQuest', stateMutability: 'nonpayable', inputs: [{ name: 'questId', type: 'uint256' }], outputs: [] },
+  { type: 'function', name: 'guilds', stateMutability: 'view', inputs: [{ name: 'guildId', type: 'bytes32' }], outputs: [{
+    components: [
+      { name: 'id', type: 'bytes32' }, 
+      { name: 'members', type: 'address[]' }
+    ], type: 'tuple' }] },
   { type: 'event', name: 'GuildCreated', inputs: [
     { indexed: true, name: 'guildId', type: 'bytes32' }, { indexed: false, name: 'members', type: 'address[]' }], anonymous: false },
   { type: 'event', name: 'QuestCompleted', inputs: [
     { indexed: true, name: 'user', type: 'address' }, { indexed: false, name: 'questId', type: 'uint256' }], anonymous: false },
 ] as const;
+
 
