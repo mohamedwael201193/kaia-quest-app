@@ -83,7 +83,7 @@ export const useAppStore = create<AppState>((set) => ({
     questsCompleted: 0,
     sbtsMinted: 0,
   },
-  setStats: (partial) =>
+  setStats: (partial: Partial<AppStats>) =>
     set((s) => ({ stats: { ...s.stats, ...partial } })),
   // Profile progress
   questProgress: 0,
