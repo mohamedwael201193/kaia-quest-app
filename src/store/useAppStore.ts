@@ -39,6 +39,10 @@ export type ActivityEvent = {
 };
 
 type AppState = {
+  // App mode
+  isDemoMode: boolean;
+  setDemoMode: (isDemoMode: boolean) => void;
+  
   // LIFF state
   liffProfile: LiffProfile;
   liffReady: boolean;         // canonical flag
@@ -57,6 +61,10 @@ type AppState = {
 };
 
 export const useAppStore = create<AppState>((set) => ({
+  // App mode
+  isDemoMode: false,
+  setDemoMode: (isDemoMode) => set({ isDemoMode }),
+  
   // LIFF
   liffProfile: null,
   liffReady: false,
