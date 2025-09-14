@@ -19,7 +19,7 @@ export type AppStats = {
   badges: number;
   questsCompleted: number;
   sbtsMinted: number;
-  [key: string]: string | number; // future-proof: additional stats allowed
+  [key: string]: string | number | undefined; // future-proof: additional stats allowed
 };
 export type ActivityEvent = {
   kind:
