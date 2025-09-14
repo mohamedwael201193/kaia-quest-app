@@ -60,13 +60,13 @@ export function useDeposit(amount: string) {
   const usdtAllowance = useTokenAllowance(ADDRESSES.USDT, ADDRESSES.VAULT)
   const parsedAmount = parseUnits(amount, 18) // Assuming 18 decimals for mUSDT
 
-  const { approve, isConfirmed: isApproved } = useApprove(ADDRESSES.USDT, ADDRESSES.VAULT, parsedAmount)
+  const { approve, isConfirming: isApproving } = useApprove(ADDRESSES.USDT, ADDRESSES.VAULT, parsedAmount)
 
   useEffect(() => {
-    if (usdtAllowance !== undefined && usdtAllowance < parsedAmount && !isApproved) {
+    if (usdtAllowance !== undefined && usdtAllowance < parsedAmount && !isApproving) {
       approve()
     }
-  }, [usdtAllowance, parsedAmount, approve, isApproved])
+  }, [usdtAllowance, parsedAmount, approve, isApproving])
 
   const deposit = () => {
     if (usdtAllowance !== undefined && usdtAllowance >= parsedAmount) {
@@ -79,7 +79,7 @@ export function useDeposit(amount: string) {
     }
   }
 
-  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
+  return { deposit, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || !isApproving }
 }
 
 export function useGuildContribute(guildId: `0x${string}`, amount: string) {
@@ -92,13 +92,13 @@ export function useGuildContribute(guildId: `0x${string}`, amount: string) {
   const usdtAllowance = useTokenAllowance(ADDRESSES.USDT, ADDRESSES.VAULT)
   const parsedAmount = parseUnits(amount, 18) // Assuming 18 decimals for mUSDT
 
-  const { approve, isConfirmed: isApproved } = useApprove(ADDRESSES.USDT, ADDRESSES.VAULT, parsedAmount)
+  const { approve, isConfirming: isApproving } = useApprove(ADDRESSES.USDT, ADDRESSES.VAULT, parsedAmount)
 
   useEffect(() => {
-    if (usdtAllowance !== undefined && usdtAllowance < parsedAmount && !isApproved) {
+    if (usdtAllowance !== undefined && usdtAllowance < parsedAmount && !isApproving) {
       approve()
     }
-  }, [usdtAllowance, parsedAmount, approve, isApproved])
+  }, [usdtAllowance, parsedAmount, approve, isApproving])
 
   const contribute = () => {
     if (usdtAllowance !== undefined && usdtAllowance >= parsedAmount) {
@@ -111,7 +111,7 @@ export function useGuildContribute(guildId: `0x${string}`, amount: string) {
     }
   }
 
-  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || isApproved }
+  return { contribute, isConfirming, isApproved: usdtAllowance !== undefined && usdtAllowance >= parsedAmount || !isApproving }
 }
 
 export function useWithdraw(amount: string) {
