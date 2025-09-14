@@ -4,19 +4,21 @@
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { useAccount } from 'wagmi'
-import { watchContractEvent } from 'wagmi/actions'
-import { publicClient, vault, quest, rewards } from '@/lib/contracts'
+import { usePublicClient } from 'wagmi'
+
+import { vault, quest, rewards } from '@/lib/contracts'
 import { useAppStore } from '@/store/useAppStore'
 
 export function ActivityWatcher() {
   const { address } = useAccount()
   const addActivity = useAppStore((state) => state.addActivity)
+  const client = usePublicClient()
 
   useEffect(() => {
-    if (!address) return
+    if (!client || !address) return
 
     // Watch Vault events
-    const unwatchVaultDeposit = watchContractEvent(publicClient, {
+    const unwatchVaultDeposit = client.watchContractEvent({
       address: vault().address,
       abi: vault().abi,
       eventName: 'Deposit',
@@ -30,7 +32,7 @@ export function ActivityWatcher() {
       },
     })
 
-    const unwatchVaultWithdraw = watchContractEvent(publicClient, {
+    const unwatchVaultWithdraw = client.watchContractEvent({
       address: vault().address,
       abi: vault().abi,
       eventName: 'Withdraw',
@@ -44,7 +46,7 @@ export function ActivityWatcher() {
       },
     })
 
-    const unwatchGuildContributed = watchContractEvent(publicClient, {
+    const unwatchGuildContributed = client.watchContractEvent({
       address: vault().address,
       abi: vault().abi,
       eventName: 'GuildContributed',
@@ -58,7 +60,7 @@ export function ActivityWatcher() {
       },
     })
 
-    const unwatchGuildFundsUnlocked = watchContractEvent(publicClient, {
+    const unwatchGuildFundsUnlocked = client.watchContractEvent({
       address: vault().address,
       abi: vault().abi,
       eventName: 'GuildFundsUnlocked',
@@ -73,7 +75,7 @@ export function ActivityWatcher() {
     })
 
     // Watch Quest events
-    const unwatchGuildCreated = watchContractEvent(publicClient, {
+    const unwatchGuildCreated = client.watchContractEvent({
       address: quest().address,
       abi: quest().abi,
       eventName: 'GuildCreated',
@@ -87,7 +89,7 @@ export function ActivityWatcher() {
       },
     })
 
-    const unwatchQuestCompleted = watchContractEvent(publicClient, {
+    const unwatchQuestCompleted = client.watchContractEvent({
       address: quest().address,
       abi: quest().abi,
       eventName: 'QuestCompleted',
@@ -102,7 +104,7 @@ export function ActivityWatcher() {
     })
 
     // Watch Rewards events
-    const unwatchBadgeMinted = watchContractEvent(publicClient, {
+    const unwatchBadgeMinted = client.watchContractEvent({
       address: rewards().address,
       abi: rewards().abi,
       eventName: 'BadgeMinted',
@@ -117,15 +119,15 @@ export function ActivityWatcher() {
     })
 
     return () => {
-      unwatchVaultDeposit()
-      unwatchVaultWithdraw()
-      unwatchGuildContributed()
-      unwatchGuildFundsUnlocked()
-      unwatchGuildCreated()
-      unwatchQuestCompleted()
-      unwatchBadgeMinted()
+      unwatchVaultDeposit?.()
+      unwatchVaultWithdraw?.()
+      unwatchGuildContributed?.()
+      unwatchGuildFundsUnlocked?.()
+      unwatchGuildCreated?.()
+      unwatchQuestCompleted?.()
+      unwatchBadgeMinted?.()
     }
-  }, [address, addActivity])
+  }, [address, addActivity, client])
 
   return null
 }
