@@ -39,6 +39,10 @@
     "wagmi": "^2.16.9",
     "zustand": "^5.0.8"
   },
+  "overrides": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19.0.0",
